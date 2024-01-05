@@ -25,27 +25,39 @@ wsServer.on('connection', function(wes : WebSocket, req : Request, res : Respons
 
     webSockets[userID] = wes; //  add new user to the connection list
 
+    console.log('User Connected: ' + userID);
+
     wes.on('message', function (message) {
 
 
         var dataString = message.toString();
+        console.log("dataString ->>>>>>>>>>    "+ dataString);
         
         if(dataString.charAt(0) == "{"){
             dataString = dataString.replace(/\'/g, '"');
             var data = JSON.parse(dataString);
-            console.log("data   =====     "+ data);
             if(data.auth == "chatapphdfgjd34534hjdfk")  {
 
             
+                console.log("SENDING IN PROGRESS ---------------------------------");
+
                 if(data.cmd == 'send'){ 
                     var boardws = webSockets[data.userid] //check if there is reciever connection
+
+                    console.log("Checking is there anu reciever --------------------------------- "+ boardws);
                     
                     if (boardws){
                         var cdata = "{'cmd':'" + data.cmd + "','userid':'"+data.userid+"', 'msgtext':'"+data.msgtext+"'}";
                         
-                        boardws.send(cdata); //send message to reciever
+                        boardws.send(cdata);
+
+                        console.log("        boardws.send(cdata);       --------------------------------- ");
                         
                         wes.send(data.cmd + ":success");
+
+                        console.log("    wes.send(data.cmd + :success)    --------------------------------- "+ boardws);
+
+
                     
                     }else{
                         console.log("No reciever user found.");
@@ -71,6 +83,11 @@ wsServer.on('connection', function(wes : WebSocket, req : Request, res : Respons
 
     })
 
+    // wes.on('typing', function() {
+    //     console.log("TYPING HAS INITIATE -------------------");
+    //     wes.send("Typing...");
+    // })
+
 
     wes.on('close', function () {
         var userID = req.url.substr(1);
@@ -86,3 +103,4 @@ wsServer.on('connection', function(wes : WebSocket, req : Request, res : Respons
 app.listen(3000, () => {
   console.log('WebSocket server is running on port 3000');
 });
+

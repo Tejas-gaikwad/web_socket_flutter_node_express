@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
+import 'all_chat_screen.dart';
 import 'chat_screen.dart';
 
-class InputIdScreen extends StatefulWidget {
-  const InputIdScreen({super.key});
+class IdScreen extends StatefulWidget {
+  const IdScreen({super.key});
 
   @override
-  State<InputIdScreen> createState() => _InputIdScreenState();
+  State<IdScreen> createState() => _IdScreenState();
 }
 
-class _InputIdScreenState extends State<InputIdScreen> {
+class _IdScreenState extends State<IdScreen> {
   late TextEditingController _idController;
 
   @override
@@ -19,17 +20,13 @@ class _InputIdScreenState extends State<InputIdScreen> {
   }
 
   @override
-  void dispose() {
-    _idController = TextEditingController();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.green,
+      ),
       body: SafeArea(
         child: Container(
-          height: MediaQuery.of(context).size.height,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -53,22 +50,23 @@ class _InputIdScreenState extends State<InputIdScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) {
-                        return ChatScreen(
-                          myid: _idController.text,
+                        return AllChatsScreen(
+                          myId: _idController.text,
                         );
                       },
                     ),
                   );
                 },
                 child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: const Text('OK')),
-              )
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: const Text('OK'),
+                ),
+              ),
             ],
           ),
         ),

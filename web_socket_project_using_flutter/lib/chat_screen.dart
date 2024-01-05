@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/io.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String myid;
+  final String recieverid;
+  final String profileName;
+  final String myId;
   const ChatScreen({
     super.key,
-    required this.myid,
+    required this.recieverid,
+    required this.profileName,
+    required this.myId,
   });
 
   @override
@@ -17,65 +21,64 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   late IOWebSocketChannel _channel;
 
-  bool connected = false; // boolean value to track connection status
+  bool connected = false;
 
-  String myid = ""; //my id
-  String recieverid = "111"; //reciever id
-  // swap myid and recieverid value on another mobile to test send and recieve
+  String myid = "";
+  String recieverid = "";
   String auth = "chatapphdfgjd34534hjdfk"; //auth key
 
   List<MessageData> msglist = [];
 
   TextEditingController msgtext = TextEditingController();
 
+  bool typing = false;
+
   @override
   void initState() {
     super.initState();
-    myid = widget.myid;
+    myid = widget.myId;
+    recieverid = widget.recieverid;
 
     channelconnect();
   }
 
   channelconnect() {
     try {
-      print('TRYING TO CONNECT TO SOCKET 1 ->>>>>>>>>>>>>>>>>>>>>>>>>>');
       _channel = IOWebSocketChannel.connect('ws://10.0.2.2:6060/$myid');
-      print('TRYING TO CONNECT TO SOCKET 2 ->>>>>>>>>>>>>>>>>>>>>>>>>>');
       _channel.stream.listen(
         (message) {
-          print("message   ->>>>>>>>>>>>>     " + message);
           setState(() {
             if (message == "connected") {
               connected = true;
               setState(() {});
-              print("Connection establised.");
-            } else if (message == "send:success") {
-              print("Message send success");
+            } else if (message.startsWith("send:success")) {
               setState(() {
                 msgtext.text = "";
               });
             } else if (message == "send:error") {
               print("Message send error");
+            } else if (message == "Typing...") {
+              setState(() {
+                typing = true;
+              });
             } else if (message.substring(0, 6) == "{'cmd'") {
-              print("Message data");
               message = message.replaceAll(RegExp("'"), '"');
               var jsondata = json.decode(message);
               msglist.add(MessageData(
-                //on message recieve, add data to model
                 msgtext: jsondata["msgtext"],
                 userid: jsondata["userid"],
                 isme: false,
               ));
-              setState(() {
-                //update UI after adding data to message model
-              });
+              setState(() {});
             }
           });
         },
         onDone: () {
           //if WebSocket is disconnected
           print("Web socket is closed");
+
           setState(() {
+            typing = false;
             connected = false;
           });
         },
@@ -88,8 +91,12 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  var i = 0;
+
   Future<void> sendmsg(String sendmsg, String id) async {
+    print('i  ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>    ${i++}');
     if (connected == true) {
+      print('connected 1 ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>    ${connected}');
       String msg =
           "{'auth':'$auth','cmd':'send','userid':'$id', 'msgtext':'$sendmsg'}";
       setState(() {
@@ -98,6 +105,7 @@ class _ChatScreenState extends State<ChatScreen> {
       });
       _channel.sink.add(msg); //send message to reciever channel
     } else {
+      print('connected 2 ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>    ${connected}');
       channelconnect();
       print("Websocket is not connected.");
     }
@@ -107,34 +115,36 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("My ID: $myid - Chat App Example"),
-        leading: Icon(Icons.circle,
-            color: connected ? Colors.greenAccent : Colors.redAccent),
-        //if app is connected to node.js then it will be gree, else red.
+        elevation: 1.0,
+        automaticallyImplyLeading: true,
+        backgroundColor: Colors.blue,
+        title: Text("My ID: $myid to $recieverid" +
+            "  ${typing == true ? 'typing...' : ""}    "),
+        leading: Icon(
+          Icons.circle,
+          color: connected
+              ? const Color.fromARGB(255, 0, 238, 20)
+              : Colors.redAccent,
+        ),
         titleSpacing: 0,
       ),
-      body: SingleChildScrollView(
-        child: Column(
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: double.infinity,
+        child: Stack(
           children: [
-            Container(
-              child: Text("Your Messages", style: TextStyle(fontSize: 20)),
-            ),
-
-            Container(
-                child: Column(
+            Column(
               children: msglist.map((onemsg) {
                 return Container(
                     margin: EdgeInsets.only(
-                      //if is my message, then it has margin 40 at left
                       left: onemsg.isme ? 40 : 0,
                       right: onemsg.isme ? 0 : 40, //else margin at right
                     ),
                     child: Card(
                         color: onemsg.isme ? Colors.blue[100] : Colors.red[100],
-                        //if its my message then, blue background else red background
                         child: Container(
                           width: double.infinity,
-                          padding: EdgeInsets.all(15),
+                          padding: const EdgeInsets.all(15),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -143,67 +153,54 @@ class _ChatScreenState extends State<ChatScreen> {
                                       ? "ID: ME"
                                       : "ID: " + onemsg.userid)),
                               Container(
-                                margin: EdgeInsets.only(top: 10, bottom: 10),
                                 child: Text("Message: " + onemsg.msgtext,
-                                    style: TextStyle(fontSize: 17)),
+                                    style: const TextStyle(fontSize: 17)),
                               ),
                             ],
                           ),
                         )));
               }).toList(),
-            )),
-
-            // Row(
-            //   children: [
-            //     Expanded(
-            //       child: StreamBuilder(
-            //         stream: _channel.stream,
-            //         builder: (context, snapshot) {
-            //           final data = snapshot.connectionState;
-            //           print('DATA  ->>>>>   ${data}');
-            //           return Container(
-            //               padding: const EdgeInsets.symmetric(
-            //                   horizontal: 12, vertical: 10),
-            //               color: Colors.amber,
-            //               child: Text(data.toString()));
-            //         },
-            //       ),
-            //     ),
-            //   ],
-            // ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: msgtext,
-                      decoration:
-                          const InputDecoration(hintText: 'Enter your message'),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                color: Colors.amber,
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        onChanged: (value) {
+                          // _channel.sink.add('{'typing'}');  // TODO add typing logic herer--------------
+                        },
+                        controller: msgtext,
+                        decoration: const InputDecoration(
+                            hintText: 'Enter your message'),
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: () {
-                      // const targetUser = 'user2';
-                      // final message = {
-                      //   'targetUser': targetUser,
-                      //   'message': "_controller.text",
-                      // };
-                      // _channel.sink.add(jsonEncode(message));
-                      // _controller.clear();
+                    IconButton(
+                      icon: const Icon(Icons.send),
+                      onPressed: () {
+                        // const targetUser = 'user2';
+                        // final message = {
+                        //   'targetUser': targetUser,
+                        //   'message': "_controller.text",
+                        // };
+                        // _channel.sink.add(jsonEncode(message));
+                        // _controller.clear();
 
-                      if (msgtext.text != "") {
-                        sendmsg(
-                          msgtext.text,
-                          recieverid,
-                        ); //send message with webspcket
-                      } else {
-                        print("Enter message");
-                      }
-                    },
-                  ),
-                ],
+                        if (msgtext.text != "") {
+                          sendmsg(
+                            msgtext.text,
+                            recieverid,
+                          ); //send message with webspcket
+                        } else {
+                          print("Enter message");
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
