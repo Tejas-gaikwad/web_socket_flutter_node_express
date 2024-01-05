@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/io.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final String myid;
+  const ChatScreen({
+    super.key,
+    required this.myid,
+  });
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -15,7 +19,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   bool connected = false; // boolean value to track connection status
 
-  String myid = "222"; //my id
+  String myid = ""; //my id
   String recieverid = "111"; //reciever id
   // swap myid and recieverid value on another mobile to test send and recieve
   String auth = "chatapphdfgjd34534hjdfk"; //auth key
@@ -27,6 +31,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    myid = widget.myid;
 
     channelconnect();
   }
@@ -189,8 +194,10 @@ class _ChatScreenState extends State<ChatScreen> {
                       // _controller.clear();
 
                       if (msgtext.text != "") {
-                        sendmsg(msgtext.text,
-                            recieverid); //send message with webspcket
+                        sendmsg(
+                          msgtext.text,
+                          recieverid,
+                        ); //send message with webspcket
                       } else {
                         print("Enter message");
                       }

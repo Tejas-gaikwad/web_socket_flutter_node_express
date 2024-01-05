@@ -16,14 +16,14 @@ app.get('/', (req, res) => {
 });
 const wsServer = new ws_1.default.Server({ port: 6060 });
 wsServer.on('connection', function (wes, req, res) {
-    console.log('User Connected: ');
+    var userID = req.url.substr(1); //  get userid from URL ip:6060/userid 
+    webSockets[userID] = wes; //  add new user to the connection list
     wes.on('message', function (message) {
-        console.log("message   =>>>>    " + message);
         var dataString = message.toString();
-        console.log("dataString   =>>>>    " + dataString);
         if (dataString.charAt(0) == "{") {
             dataString = dataString.replace(/\'/g, '"');
             var data = JSON.parse(dataString);
+            console.log("data   =====     " + data);
             if (data.auth == "chatapphdfgjd34534hjdfk") {
                 if (data.cmd == 'send') {
                     var boardws = webSockets[data.userid]; //check if there is reciever connection
@@ -59,28 +59,6 @@ wsServer.on('connection', function (wes, req, res) {
     });
     wes.send('connected'); //initial connection return message
 });
-// wss.on('connection', (ws: WebSocket) => {
-//   console.log('Client connected');
-//   clients.add(ws);
-//   ws.on('message', (message: string) => {
-//     const data = JSON.parse(message);
-//     console.log('targetUSer   ->>>>>>>>    '+ data.targetUser);
-//     const targetSocket = Array.from(clients).find(client => {
-//         return client !== ws && client.readyState ===  WebSocket.OPEN;
-//     })
-//     console.log('targetSocket   ->>>>>>>>    '+ targetSocket);
-//     if (targetSocket) {
-//         targetSocket.send(JSON.stringify({ message: data.message }));
-//     }
-//     console.log('targetSocket   msg sent->>>>>>>>    ');
-//   });
-//   ws.on('close', () => {
-//     console.log('Client disconnected');
-//   });
-//   ws.on('typing', () => {
-//     console.log("Typing...");
-//   });
-// });
 app.listen(3000, () => {
     console.log('WebSocket server is running on port 3000');
 });
