@@ -4,8 +4,6 @@ import WebSocket from 'ws';
 
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
-const clients = new Set<WebSocket>();
 
 interface WebSockets {
     [key: string]: any;
@@ -17,7 +15,13 @@ app.get('/', (req, res) => {
     res.send("hello world !");
 });
 
-const wsServer = new WebSocket.Server({ port: 6060});
+app.get('/check', (req, res) => {
+    res.status(200).json({
+        'data' : "Everything is ok "
+    });
+});
+
+const wsServer = new WebSocket.Server({ server });
 
 wsServer.on('connection', function(wes : WebSocket, req : Request, res : Response) {
 
@@ -100,7 +104,7 @@ wsServer.on('connection', function(wes : WebSocket, req : Request, res : Respons
 })
 
 
-app.listen(3000, () => {
+app.listen((process.env.PORT) || 3000, () => {
   console.log('WebSocket server is running on port 3000');
 });
 

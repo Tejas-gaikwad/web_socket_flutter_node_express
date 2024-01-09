@@ -44,7 +44,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   channelconnect() {
     try {
-      _channel = IOWebSocketChannel.connect('ws://10.0.2.2:6060/$myid');
+      _channel = IOWebSocketChannel.connect(
+        // 'ws://10.0.2.2:3000/$myid',
+        // 'ws://10.0.2.2:3000/$myid',
+        'ws://web-socket-app-0504-6fbf1f6526f6.herokuapp.com/$myid',
+        headers: {'Connection': 'Upgrade', 'Upgrade': 'websocket'},
+      );
       _channel.stream.listen(
         (message) {
           setState(() {
