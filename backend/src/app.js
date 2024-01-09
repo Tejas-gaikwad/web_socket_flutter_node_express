@@ -12,8 +12,10 @@ var webSockets = {};
 app.get('/', (req, res) => {
     res.send("hello world !");
 });
-const wsServer = new ws_1.default.Server({ server });
+const wsServer = new ws_1.default.Server({ server: server });
 wsServer.on('connection', function (wes, req, res) {
+    console.log('Client connected');
+    console.log('req.url.substr(1)  ________>>>>>>>>>>>>>>>.: ' + req.url.substr(1));
     var userID = req.url.substr(1); //  get userid from URL ip:6060/userid 
     webSockets[userID] = wes; //  add new user to the connection list
     console.log('User Connected: ' + userID);
@@ -55,10 +57,10 @@ wsServer.on('connection', function (wes, req, res) {
             wes.send(data.cmd + ":error");
         }
     });
-    // wes.on('typing', function() {
-    //     console.log("TYPING HAS INITIATE -------------------");
-    //     wes.send("Typing...");
-    // })
+    wes.on('typing', function () {
+        console.log("TYPING HAS INITIATE -------------------");
+        wes.send("Typing...");
+    });
     wes.on('close', function () {
         var userID = req.url.substr(1);
         delete webSockets[userID];

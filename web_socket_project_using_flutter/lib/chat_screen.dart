@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:web_socket_channel/io.dart';
+// import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/io.dart'; // Use 'package:web_socket_channel/html.dart' for web applications
 
 class ChatScreen extends StatefulWidget {
   final String recieverid;
@@ -47,7 +49,8 @@ class _ChatScreenState extends State<ChatScreen> {
       _channel = IOWebSocketChannel.connect(
         // 'ws://10.0.2.2:3000/$myid',
         // 'ws://10.0.2.2:3000/$myid',
-        'ws://web-socket-app-0504-6fbf1f6526f6.herokuapp.com/$myid',
+        // 'ws://web-socket-app-0504-6fbf1f6526f6.herokuapp.com/$myid',
+        'wss://web-socket-app-0504-6fbf1f6526f6.herokuapp.com:0/', //$myid
         headers: {'Connection': 'Upgrade', 'Upgrade': 'websocket'},
       );
       _channel.stream.listen(
@@ -92,7 +95,7 @@ class _ChatScreenState extends State<ChatScreen> {
         },
       );
     } catch (error) {
-      print("error on connecting to websocket.   ==>>>>    $error");
+      print("error on connecting to websocket.   ==>>>>    ${error}");
     }
   }
 
