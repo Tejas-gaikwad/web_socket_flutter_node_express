@@ -48,9 +48,8 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       _channel = IOWebSocketChannel.connect(
         // 'ws://10.0.2.2:3000/$myid',
-        // 'ws://10.0.2.2:3000/$myid',
-        // 'ws://web-socket-app-0504-6fbf1f6526f6.herokuapp.com/$myid',
-        'wss://web-socket-app-0504-6fbf1f6526f6.herokuapp.com:0/', //$myid
+
+        'wss://web-socket-app-0504-6fbf1f6526f6.herokuapp.com/$myid', //$myid
         headers: {'Connection': 'Upgrade', 'Upgrade': 'websocket'},
       );
       _channel.stream.listen(
@@ -102,9 +101,7 @@ class _ChatScreenState extends State<ChatScreen> {
   var i = 0;
 
   Future<void> sendmsg(String sendmsg, String id) async {
-    print('i  ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>    ${i++}');
     if (connected == true) {
-      print('connected 1 ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>    ${connected}');
       String msg =
           "{'auth':'$auth','cmd':'send','userid':'$id', 'msgtext':'$sendmsg'}";
       setState(() {
@@ -113,7 +110,6 @@ class _ChatScreenState extends State<ChatScreen> {
       });
       _channel.sink.add(msg); //send message to reciever channel
     } else {
-      print('connected 2 ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>    ${connected}');
       channelconnect();
       print("Websocket is not connected.");
     }
